@@ -150,7 +150,7 @@ public class TextEditorPanel extends JPanel {
             @Override
             public void keyReleased(KeyEvent e) {
                 if (currentNote != null) {
-                    currentNote.setTitle(titleField.getText());
+                    currentNote = new Note(titleField.getText(), currentNote.getContent());
                     if (documentChangeListener != null) documentChangeListener.run();
                 }
             }
@@ -159,7 +159,7 @@ public class TextEditorPanel extends JPanel {
             @Override
             public void keyReleased(KeyEvent e) {
                 if (currentNote != null) {
-                    currentNote.setContent(textPane.getText());
+                    currentNote = new Note(currentNote.getTitle(), textPane.getText());
                     if (documentChangeListener != null) documentChangeListener.run();
                 }
             }

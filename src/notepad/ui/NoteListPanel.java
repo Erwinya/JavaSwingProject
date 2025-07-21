@@ -35,11 +35,11 @@ public class NoteListPanel extends JPanel {
                 if (e.getClickCount() == 2) {
                     int index = noteJList.locationToIndex(e.getPoint());
                     if (index >= 0) {
-                        Note note = listModel.getElementAt(index);
-                        String newTitle = JOptionPane.showInputDialog(NoteListPanel.this, "Edit note title:", note.getTitle());
+                        Note oldNote = listModel.getElementAt(index);
+                        String newTitle = JOptionPane.showInputDialog(NoteListPanel.this, "Edit note title:", oldNote.getTitle());
                         if (newTitle != null && !newTitle.trim().isEmpty()) {
-                            note.setTitle(newTitle.trim());
-                            noteService.updateNote(index, note);
+                            Note updatedNote = new Note(newTitle.trim(), oldNote.getContent());
+                            noteService.updateNote(index, updatedNote);
                             refresh();
                             noteJList.setSelectedIndex(index);
                         }
