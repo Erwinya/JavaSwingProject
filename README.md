@@ -18,40 +18,65 @@ A modern, modular, and extensible Notepad application built with Java Swing, fol
 ## Project Structure
 ```
 JavaSwingProject/
- └── src/
-      ├── Main.java
-      └── notepad/
-           ├── NotepadApp.java
-           ├── NotepadFrame.java
-           ├── model/
-           │    └── Note.java
-           ├── service/
-           │    └── NoteService.java
-           └── ui/
-                ├── NoteListPanel.java
-                ├── TextEditorPanel.java
-                └── MenuBarFactory.java
+ ├── src/
+ │    ├── Main.java
+ │    └── notepad/
+ │         ├── NotepadApp.java
+ │         ├── NotepadFrame.java
+ │         ├── model/
+ │         │    └── Note.java
+ │         ├── service/
+ │         │    └── NoteService.java
+ │         └── ui/
+ │              ├── NoteListPanel.java
+ │              ├── TextEditorPanel.java
+ │              └── MenuBarFactory.java
+ ├── dist/
+ │    ├── NotepadApp.jar
+ │    ├── windows/
+ │    │    ├── README.txt
+ │    │    └── NotepadApp.exe (opsiyonel)
+ │    ├── mac/
+ │    │    ├── README.txt
+ │    │    └── NotepadApp.command
+ │    └── linux/
+ │         ├── README.txt
+ │         └── NotepadApp.sh
+ └── notes.ser
 ```
 
-## SOLID & Clean Code Principles
-- **Single Responsibility:** Each class has one clear responsibility (UI, model, service, etc.)
-- **Open/Closed:** Easily extendable with new features without modifying existing code
-- **Liskov Substitution:** Components can be replaced with their subtypes
-- **Interface Segregation:** UI and service layers are loosely coupled
-- **Dependency Inversion:** UI depends on abstractions, not concrete implementations
 - **Clean Code:** Descriptive names, short and focused methods, no duplication, clear comments, no dead code
+## Installation & Usage
 
-## Installation & Running
-1. **Clone or download the project.**
-2. **Navigate to the project root in your terminal.**
-3. **Compile:**
-   ```bash
-   mkdir -p out
-   javac -d out src/Main.java src/notepad/NotepadApp.java src/notepad/NotepadFrame.java src/notepad/model/Note.java src/notepad/service/NoteService.java src/notepad/ui/TextEditorPanel.java src/notepad/ui/MenuBarFactory.java src/notepad/ui/NoteListPanel.java
-   ```
-4. **Run:**
-   ```bash
-   java -cp out Main
+### Windows
+- Java yüklü olmalı.
+- `dist/windows/NotepadApp.exe` dosyasını çalıştırın veya `dist/NotepadApp.jar` dosyasını komut satırından çalıştırın:
+  ```
+  java -jar dist/NotepadApp.jar
+  ```
+
+### Mac
+- Java yüklü olmalı.
+- Terminalde:
+  ```
+  sh dist/mac/NotepadApp.command
+  ```
+  veya doğrudan jar dosyasını çalıştırın.
+
+### Linux
+- Java yüklü olmalı.
+- Terminalde:
+  ```
+  sh dist/linux/NotepadApp.sh
+  ```
+  veya doğrudan jar dosyasını çalıştırın.
+
+### Notlar
+- `notes.ser` dosyası uygulama notlarını saklamak için kullanılır.
+- .exe dosyasını oluşturmak için Launch4j gibi araçlar kullanılabilir.
+
+## SOLID & Clean Code Principles
+...existing code...
    ```
 
 ## Usage
