@@ -1,0 +1,3 @@
+// Buraya derlenmiş jar dosyası konulacak. Java ile: 
+// mvn package veya javac ile derleyip jar oluşturabilirsiniz.
+// Örnek: java -jar NotepadApp.jar
