@@ -5,8 +5,6 @@ import notepad.service.NoteService;
 
 import javax.swing.*;
 import javax.swing.text.*;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;

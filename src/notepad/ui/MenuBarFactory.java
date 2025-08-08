@@ -2,13 +2,10 @@ package notepad.ui;
 
 import javax.swing.*;
 import notepad.service.NoteService;
-import notepad.ui.TextEditorPanel;
-import notepad.ui.NoteListPanel;
 import notepad.model.Note;
 import javax.swing.text.Document;
 import javax.swing.text.rtf.RTFEditorKit;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.io.*;
 
 public class MenuBarFactory {

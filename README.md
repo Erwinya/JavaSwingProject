@@ -46,34 +46,6 @@ JavaSwingProject/
 ```
 
 - **Clean Code:** Descriptive names, short and focused methods, no duplication, clear comments, no dead code
-## Installation & Usage
-
-### Windows
-- Java yüklü olmalı.
-- `dist/windows/NotepadApp.exe` dosyasını çalıştırın veya `dist/NotepadApp.jar` dosyasını komut satırından çalıştırın:
-  ```
-  java -jar dist/NotepadApp.jar
-  ```
-
-### Mac
-- Java yüklü olmalı.
-- Terminalde:
-  ```
-  sh dist/mac/NotepadApp.command
-  ```
-  veya doğrudan jar dosyasını çalıştırın.
-
-### Linux
-- Java yüklü olmalı.
-- Terminalde:
-  ```
-  sh dist/linux/NotepadApp.sh
-  ```
-  veya doğrudan jar dosyasını çalıştırın.
-
-### Notlar
-- `notes.ser` dosyası uygulama notlarını saklamak için kullanılır.
-- .exe dosyasını oluşturmak için Launch4j gibi araçlar kullanılabilir.
 
 ## SOLID & Clean Code Principles
 ...existing code...
