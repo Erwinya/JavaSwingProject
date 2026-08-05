@@ -1,2 +1,2 @@
 @echo off
-java -jar "%~dp0..\NotepadApp.jar" 
+java -jar ..\..\target\swing-notepad-1.0.0.jar
