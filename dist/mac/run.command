@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
 DIR="$(cd "$(dirname "$0")" && pwd)"
-java -jar "$DIR/../../target/swing-notepad-1.0.0.jar"
+java -jar "$DIR/../../target/noteshelf-1.0.0.jar"

@@ -1,15 +1,16 @@
-#!/bin/bash
-set -e
-INSTALL_DIR="/opt/notepadapp"
-JAR_NAME="NotepadApp.jar"
-
-sudo mkdir -p "$INSTALL_DIR"
-sudo cp "$(dirname "$0")/../NotepadApp.jar" "$INSTALL_DIR/$JAR_NAME"
-echo "[Desktop Entry]" > ~/Desktop/NotepadApp.desktop
-echo "Type=Application" >> ~/Desktop/NotepadApp.desktop
-echo "Name=NotepadApp" >> ~/Desktop/NotepadApp.desktop
-echo "Exec=java -jar $INSTALL_DIR/$JAR_NAME" >> ~/Desktop/NotepadApp.desktop
-echo "Icon=java" >> ~/Desktop/NotepadApp.desktop
-echo "Terminal=false" >> ~/Desktop/NotepadApp.desktop
-chmod +x ~/Desktop/NotepadApp.desktop
-echo "NotepadApp installed. Shortcut created on Desktop." 
+#!/usr/bin/env bash
+echo "Installing NoteShelf..."
+INSTALL_DIR="$HOME/.local/share/noteshelf"
+JAR_NAME="noteshelf-1.0.0.jar"
+mkdir -p "$INSTALL_DIR"
+cp "$(dirname "$0")/../../target/$JAR_NAME" "$INSTALL_DIR/$JAR_NAME"
+cat > ~/Desktop/NoteShelf.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Name=NoteShelf
+Exec=java -jar $INSTALL_DIR/$JAR_NAME
+Icon=$INSTALL_DIR/$JAR_NAME
+Terminal=false
+EOF
+chmod +x ~/Desktop/NoteShelf.desktop
+echo "NoteShelf installed. Shortcut created on Desktop."

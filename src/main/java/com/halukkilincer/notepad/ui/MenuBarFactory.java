@@ -1,33 +1,64 @@
 package com.halukkilincer.notepad.ui;
 
-import javax.swing.*;
-import com.halukkilincer.notepad.service.NoteService;
+import com.halukkilincer.notepad.AppBranding;
+import com.halukkilincer.notepad.NotepadFrame;
 import com.halukkilincer.notepad.model.Note;
+import com.halukkilincer.notepad.service.NoteService;
+
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.text.Document;
 import javax.swing.text.rtf.RTFEditorKit;
-import java.awt.*;
-import java.io.*;
+import java.awt.Component;
+import java.awt.Desktop;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
 
-public class MenuBarFactory {
-    public static JMenuBar createMenuBar(TextEditorPanel editorPanel, NoteService noteService, NoteListPanel noteListPanel, JFrame parentFrame) {
+public final class MenuBarFactory {
+
+    private MenuBarFactory() {
+    }
+
+    public static JMenuBar createMenuBar(
+            TextEditorPanel editorPanel,
+            NoteService noteService,
+            NoteListPanel noteListPanel,
+            JFrame parentFrame
+    ) {
         JMenuBar menuBar = new JMenuBar();
 
-        // File
         JMenu fileMenu = new JMenu("File");
         fileMenu.add(createMenuItem("New Note", e -> noteListPanel.onAddNote(null)));
-        fileMenu.add(createMenuItem("Open...", e -> openNote(editorPanel, noteService, parentFrame)));
-        fileMenu.add(createMenuItem("Save", e -> saveNote(editorPanel, noteService, parentFrame, false)));
-        fileMenu.add(createMenuItem("Save As...", e -> saveNote(editorPanel, noteService, parentFrame, true)));
+        fileMenu.add(createMenuItem("Open...", e -> openNote(noteService, noteListPanel, parentFrame)));
+        JMenuItem saveItem = createMenuItem("Save", e -> persist(parentFrame));
+        saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+        fileMenu.add(saveItem);
+        fileMenu.add(createMenuItem("Save As...", e -> saveNote(editorPanel, parentFrame)));
         fileMenu.addSeparator();
         fileMenu.add(createMenuItem("Export as TXT", e -> exportNote(editorPanel, parentFrame, "txt")));
         fileMenu.add(createMenuItem("Export as RTF", e -> exportNote(editorPanel, parentFrame, "rtf")));
         fileMenu.add(createMenuItem("Export as HTML", e -> exportNote(editorPanel, parentFrame, "html")));
         fileMenu.add(createMenuItem("Import Note", e -> importNote(noteService, noteListPanel, parentFrame)));
         fileMenu.addSeparator();
-        fileMenu.add(createMenuItem("Exit", e -> System.exit(0)));
+        fileMenu.add(createMenuItem("Exit", e ->
+                parentFrame.dispatchEvent(new WindowEvent(parentFrame, WindowEvent.WINDOW_CLOSING))));
         menuBar.add(fileMenu);
 
-        // Edit
         JMenu editMenu = new JMenu("Edit");
         editMenu.add(createMenuItem("Undo", e -> editorPanel.undo()));
         editMenu.add(createMenuItem("Redo", e -> editorPanel.redo()));
@@ -37,10 +68,11 @@ public class MenuBarFactory {
         editMenu.add(createMenuItem("Paste", e -> editorPanel.paste()));
         editMenu.add(createMenuItem("Select All", e -> editorPanel.selectAll()));
         editMenu.addSeparator();
-        editMenu.add(createMenuItem("Find/Replace", e -> editorPanel.findReplace()));
+        JMenuItem findItem = createMenuItem("Find/Replace", e -> editorPanel.findReplace());
+        findItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
+        editMenu.add(findItem);
         menuBar.add(editMenu);
 
-        // View
         JMenu viewMenu = new JMenu("View");
         JCheckBoxMenuItem showToolbar = new JCheckBoxMenuItem("Show Toolbar", true);
         showToolbar.addActionListener(e -> editorPanel.setToolbarVisible(showToolbar.isSelected()));
@@ -51,38 +83,38 @@ public class MenuBarFactory {
         viewMenu.add(createMenuItem("Full Screen", e -> parentFrame.setExtendedState(JFrame.MAXIMIZED_BOTH)));
         menuBar.add(viewMenu);
 
-        // Settings
         JMenu settingsMenu = new JMenu("Settings");
-        settingsMenu.add(createMenuItem("Auto-save Interval", e -> {
-            String input = JOptionPane.showInputDialog(parentFrame, "Auto-save interval (seconds):", "Settings", JOptionPane.PLAIN_MESSAGE);
-            try {
-                int seconds = Integer.parseInt(input);
-                // You can implement a timer in NotepadFrame to use this value
-                JOptionPane.showMessageDialog(parentFrame, "Auto-save interval set to " + seconds + " seconds.");
-            } catch (Exception ignored) {}
-        }));
-        settingsMenu.add(createMenuItem("Font", e -> editorPanel.chooseFont()));
-        settingsMenu.add(createMenuItem("Theme", e -> JOptionPane.showMessageDialog(parentFrame, "Change theme from the Theme menu.")));
-        settingsMenu.add(createMenuItem("Default Save Path", e -> JOptionPane.showMessageDialog(parentFrame, "Not implemented yet.")));
+        settingsMenu.add(createMenuItem("Default Font...", e -> editorPanel.chooseFont()));
+        settingsMenu.add(createMenuItem("Notes file location", e ->
+                JOptionPane.showMessageDialog(
+                        parentFrame,
+                        "Notes are stored at:\n" + noteService.getSaveFile(),
+                        "Storage",
+                        JOptionPane.INFORMATION_MESSAGE
+                )));
         menuBar.add(settingsMenu);
 
-        // Theme
         JMenu themeMenu = new JMenu("Theme");
-        themeMenu.add(createMenuItem("Light", e -> setTheme("light", parentFrame)));
-        themeMenu.add(createMenuItem("Dark", e -> setTheme("dark", parentFrame)));
-        themeMenu.add(createMenuItem("System Default", e -> setTheme("system", parentFrame)));
-        themeMenu.add(createMenuItem("High Contrast", e -> setTheme("high-contrast", parentFrame)));
+        themeMenu.add(createMenuItem("Light", e -> applyTheme(ThemeManager.Theme.LIGHT, parentFrame)));
+        themeMenu.add(createMenuItem("Dark", e -> applyTheme(ThemeManager.Theme.DARK, parentFrame)));
+        themeMenu.add(createMenuItem("System Default", e -> applyTheme(ThemeManager.Theme.SYSTEM, parentFrame)));
+        themeMenu.add(createMenuItem("High Contrast", e -> applyTheme(ThemeManager.Theme.HIGH_CONTRAST, parentFrame)));
         menuBar.add(themeMenu);
 
-        // Help
         JMenu helpMenu = new JMenu("Help");
         helpMenu.add(createMenuItem("About", e -> showAboutDialog(parentFrame)));
         helpMenu.add(createMenuItem("Keyboard Shortcuts", e -> showShortcutsDialog(parentFrame)));
         helpMenu.add(createMenuItem("Help Contents", e -> showHelpDialog(parentFrame)));
-        helpMenu.add(createMenuItem("Feedback", e -> showFeedbackDialog(parentFrame)));
+        helpMenu.add(createMenuItem("Website", e -> openWebsite(parentFrame)));
         menuBar.add(helpMenu);
 
         return menuBar;
+    }
+
+    private static void persist(JFrame parentFrame) {
+        if (parentFrame instanceof NotepadFrame frame) {
+            frame.persistAndSave();
+        }
     }
 
     private static JMenuItem createMenuItem(String text, java.awt.event.ActionListener action) {
@@ -91,8 +123,7 @@ public class MenuBarFactory {
         return item;
     }
 
-    // File actions
-    private static void openNote(TextEditorPanel editorPanel, NoteService noteService, JFrame parent) {
+    private static void openNote(NoteService noteService, NoteListPanel noteListPanel, JFrame parent) {
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showOpenDialog(parent);
         if (result == JFileChooser.APPROVE_OPTION) {
@@ -100,57 +131,71 @@ public class MenuBarFactory {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 StringBuilder sb = new StringBuilder();
                 String line;
-                while ((line = reader.readLine()) != null) sb.append(line).append("\n");
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append('\n');
+                }
                 Note note = new Note(file.getName(), sb.toString());
                 noteService.addNote(note);
-                JOptionPane.showMessageDialog(parent, "Note imported as: " + file.getName());
+                noteListPanel.refresh();
+                noteListPanel.getNoteJList().setSelectedValue(note, true);
             } catch (IOException ex) {
                 showError(parent, "File could not be opened.");
             }
         }
     }
-    private static void saveNote(TextEditorPanel editorPanel, NoteService noteService, JFrame parent, boolean saveAs) {
-        Note note = editorPanel.getCurrentNote();
-        if (note == null) return;
+
+    private static void saveNote(TextEditorPanel editorPanel, JFrame parent) {
+        if (editorPanel.getCurrentNote() == null) {
+            return;
+        }
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showSaveDialog(parent);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
                 writer.write(editorPanel.getTextPane().getText());
-                JOptionPane.showMessageDialog(parent, "Note saved as: " + file.getName());
             } catch (IOException ex) {
                 showError(parent, "File could not be saved.");
             }
         }
     }
+
     private static void exportNote(TextEditorPanel editorPanel, JFrame parent, String type) {
-        Note note = editorPanel.getCurrentNote();
-        if (note == null) return;
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showSaveDialog(parent);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             try {
-                if (type.equals("txt")) {
-                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                        writer.write(editorPanel.getTextPane().getText());
+                switch (type) {
+                    case "txt" -> {
+                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                            writer.write(editorPanel.getTextPane().getText());
+                        }
                     }
-                } else if (type.equals("rtf")) {
-                    try (FileOutputStream fos = new FileOutputStream(file)) {
-                        new RTFEditorKit().write(fos, editorPanel.getTextPane().getDocument(), 0, editorPanel.getTextPane().getDocument().getLength());
+                    case "rtf" -> {
+                        RTFEditorKit rtfKit = new RTFEditorKit();
+                        try (FileWriter writer = new FileWriter(file)) {
+                            rtfKit.write(writer, editorPanel.getTextPane().getDocument(), 0,
+                                    editorPanel.getTextPane().getDocument().getLength());
+                        }
                     }
-                } else if (type.equals("html")) {
-                    try (FileWriter writer = new FileWriter(file)) {
-                        writer.write("<html><body>" + editorPanel.getTextPane().getText().replace("\n", "<br>") + "</body></html>");
+                    case "html" -> {
+                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                            writer.write("<html><body><pre>");
+                            writer.write(editorPanel.getTextPane().getText());
+                            writer.write("</pre></body></html>");
+                        }
+                    }
+                    default -> {
                     }
                 }
-                JOptionPane.showMessageDialog(parent, "Note exported as: " + file.getName());
+                JOptionPane.showMessageDialog(parent, "Exported successfully.");
             } catch (Exception ex) {
                 showError(parent, "Export failed.");
             }
         }
     }
+
     private static void importNote(NoteService noteService, NoteListPanel noteListPanel, JFrame parent) {
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showOpenDialog(parent);
@@ -164,20 +209,15 @@ public class MenuBarFactory {
                     rtfKit.read(new FileInputStream(file), doc, 0);
                     Note note = new Note(file.getName(), doc.getText(0, doc.getLength()));
                     noteService.addNote(note);
-                } else if (name.endsWith(".html") || name.endsWith(".htm")) {
-                    BufferedReader reader = new BufferedReader(new FileReader(file));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) sb.append(line).append("\n");
-                    Note note = new Note(file.getName(), sb.toString());
-                    noteService.addNote(note);
                 } else {
-                    BufferedReader reader = new BufferedReader(new FileReader(file));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) sb.append(line).append("\n");
-                    Note note = new Note(file.getName(), sb.toString());
-                    noteService.addNote(note);
+                    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            sb.append(line).append('\n');
+                        }
+                        noteService.addNote(new Note(file.getName(), sb.toString()));
+                    }
                 }
                 noteListPanel.refresh();
                 JOptionPane.showMessageDialog(parent, "Note imported as: " + file.getName());
@@ -186,79 +226,63 @@ public class MenuBarFactory {
             }
         }
     }
-    private static void setTheme(String theme, JFrame parent) {
+
+    private static void applyTheme(ThemeManager.Theme theme, JFrame parent) {
         try {
-            switch (theme) {
-                case "light":
-                    UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-                    break;
-                case "dark":
-                    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-                    break;
-                case "system":
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                    break;
-                case "high-contrast":
-                    UIManager.put("control", java.awt.Color.BLACK);
-                    UIManager.put("info", java.awt.Color.BLACK);
-                    UIManager.put("nimbusBase", java.awt.Color.BLACK);
-                    UIManager.put("nimbusAlertYellow", java.awt.Color.YELLOW);
-                    UIManager.put("nimbusDisabledText", java.awt.Color.GRAY);
-                    UIManager.put("nimbusFocus", java.awt.Color.YELLOW);
-                    UIManager.put("nimbusGreen", java.awt.Color.GREEN);
-                    UIManager.put("nimbusInfoBlue", java.awt.Color.BLUE);
-                    UIManager.put("nimbusLightBackground", java.awt.Color.BLACK);
-                    UIManager.put("nimbusOrange", java.awt.Color.ORANGE);
-                    UIManager.put("nimbusRed", java.awt.Color.RED);
-                    UIManager.put("nimbusSelectedText", java.awt.Color.WHITE);
-                    UIManager.put("nimbusSelectionBackground", java.awt.Color.YELLOW);
-                    UIManager.put("text", java.awt.Color.WHITE);
-                    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-                    break;
-            }
-            SwingUtilities.updateComponentTreeUI(parent);
+            ThemeManager.apply(theme, parent);
         } catch (Exception ex) {
             showError(parent, "Theme could not be applied.");
         }
     }
+
     private static void showAboutDialog(JFrame parent) {
-        JOptionPane.showMessageDialog(parent,
-                "Swing Notepad v1.0.0\n"
-                        + "A modular multi-note desktop editor\n"
-                        + "Built with Java Swing\n"
-                        + "(c) 2026 Haluk Kilincer",
-                "About", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(
+                parent,
+                AppBranding.aboutText(),
+                "About " + AppBranding.APP_NAME,
+                JOptionPane.INFORMATION_MESSAGE,
+                AppBranding.aboutIcon(64)
+        );
     }
+
     private static void showShortcutsDialog(JFrame parent) {
-        String shortcuts = "Shortcuts:\n" +
-                "Ctrl+B: Bold\n" +
-                "Ctrl+I: Italic\n" +
-                "Ctrl+U: Underline\n" +
-                "Ctrl+Z: Undo\n" +
-                "Ctrl+Y: Redo\n" +
-                "Ctrl+L: Align Left\n" +
-                "Ctrl+E: Center\n" +
-                "Ctrl+R: Align Right\n" +
-                "Ctrl+Shift+B: Bullet\n" +
-                "Ctrl+F: Find\n" +
-                "Ctrl+S: Save\n";
+        String shortcuts = """
+                Shortcuts:
+                Ctrl+S: Save notes
+                Ctrl+B: Bold
+                Ctrl+I: Italic
+                Ctrl+U: Underline
+                Ctrl+Z: Undo
+                Ctrl+Y: Redo
+                Ctrl+L: Align left
+                Ctrl+E: Center
+                Ctrl+R: Align right
+                Ctrl+Shift+B: Bullet list
+                Ctrl+F: Find/Replace
+                """;
         JOptionPane.showMessageDialog(parent, shortcuts, "Keyboard Shortcuts", JOptionPane.INFORMATION_MESSAGE);
     }
+
     private static void showHelpDialog(JFrame parent) {
-        String help = "Swing Notepad guide:\n" +
-                "- Add, delete, or rename notes from the left panel (double-click to rename).\n" +
-                "- Use the rich text editor on the right to format your notes.\n" +
-                "- Manage files, themes, and settings from the menu bar.\n" +
-                "- Access shortcuts and more from the Help menu.";
+        String help = AppBranding.APP_NAME + """
+                 guide:
+                - Add, delete, or rename notes from the left panel (double-click to rename).
+                - Use the toolbar to format text, align paragraphs, and build lists.
+                - Notes auto-save under your user profile; Ctrl+S also saves immediately.
+                - Themes are available from the Theme menu.
+                """;
         JOptionPane.showMessageDialog(parent, help, "Help Contents", JOptionPane.INFORMATION_MESSAGE);
     }
-    private static void showFeedbackDialog(JFrame parent) {
-        String feedback = JOptionPane.showInputDialog(parent, "Enter your feedback:", "Feedback", JOptionPane.PLAIN_MESSAGE);
-        if (feedback != null && !feedback.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(parent, "Thank you! Your feedback has been recorded.");
+
+    private static void openWebsite(JFrame parent) {
+        try {
+            Desktop.getDesktop().browse(URI.create("https://halukkilincer.com"));
+        } catch (Exception ex) {
+            showError(parent, "Could not open website.");
         }
     }
+
     private static void showError(Component parent, String message) {
         JOptionPane.showMessageDialog(parent, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
-} 
+}

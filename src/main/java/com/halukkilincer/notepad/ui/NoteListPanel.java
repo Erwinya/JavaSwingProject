@@ -71,6 +71,14 @@ public class NoteListPanel extends JPanel {
         }
     }
 
+    public void replaceAt(int index, Note note) {
+        if (index < 0 || index >= listModel.size()) {
+            return;
+        }
+        noteService.updateNote(index, note);
+        listModel.set(index, note);
+    }
+
     public JList<Note> getNoteJList() {
         return noteJList;
     }

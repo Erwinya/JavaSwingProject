@@ -1,17 +1,17 @@
-# Swing Notepad
+# NoteShelf
 
-A modular multi-note desktop Notepad built with **Java Swing**.
+A focused multi-note desktop editor built with **Java Swing**.
 
-Repository: [Erwinya/swing-notepad](https://github.com/Erwinya/swing-notepad)
+Repository: [Erwinya/noteshelf](https://github.com/Erwinya/noteshelf)
 
 ## Features
 
 - Multi-note sidebar (add, remove, rename)
-- Rich text editing toolbar (styles, fonts, colors, lists)
+- Modern formatting toolbar (fonts, styles, colors, alignment, lists)
 - File open/save and export (TXT, RTF, HTML)
 - Undo / redo, find & replace
 - Light / dark / high-contrast themes
-- Notes auto-saved to your user profile folder
+- HK brand icon; notes auto-saved under your user profile
 
 ## Requirements
 
@@ -23,20 +23,21 @@ Repository: [Erwinya/swing-notepad](https://github.com/Erwinya/swing-notepad)
 ```bash
 mvn -q test
 mvn -q package
-java -jar target/swing-notepad-1.0.0.jar
+java -jar target/noteshelf-1.0.0.jar
 ```
 
 On Windows PowerShell:
 
 ```powershell
 mvn -q package
-java -jar target\swing-notepad-1.0.0.jar
+java -jar target\noteshelf-1.0.0.jar
 ```
 
 ## Project structure
 
 ```text
 src/main/java/com/halukkilincer/notepad/
+├── AppBranding.java
 ├── Main.java
 ├── NotepadApp.java
 ├── NotepadFrame.java
@@ -45,16 +46,20 @@ src/main/java/com/halukkilincer/notepad/
 └── ui/
     ├── MenuBarFactory.java
     ├── NoteListPanel.java
-    └── TextEditorPanel.java
+    ├── TextEditorPanel.java
+    ├── ThemeManager.java
+    └── ToolbarIcons.java
+src/main/resources/
+└── logo-hk.png
 ```
 
 ## Notes storage
 
-Saved notes are stored at:
-
 ```text
-~/.swing-notepad/notes.ser
+~/.noteshelf/notes.ser
 ```
+
+Existing data from `~/.swing-notepad/` is loaded automatically on first run, then rewritten to the new location on save.
 
 ## License
 

@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.halukkilincer</groupId>
-    <artifactId>swing-notepad</artifactId>
+    <artifactId>noteshelf</artifactId>
     <version>1.0.0</version>
-    <name>swing-notepad</name>
-    <description>Modular multi-note desktop Notepad built with Java Swing</description>
+    <name>NoteShelf</name>
+    <description>NoteShelf — a focused multi-note desktop editor built with Java Swing</description>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>

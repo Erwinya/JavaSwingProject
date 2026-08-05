@@ -1,6 +1,7 @@
 package com.halukkilincer.notepad.service;
 
 import com.halukkilincer.notepad.model.Note;
+import com.halukkilincer.notepad.AppBranding;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -49,6 +50,10 @@ public class NoteService {
         notes.set(index, Objects.requireNonNull(note, "note must not be null"));
     }
 
+    public int indexOf(Note note) {
+        return notes.indexOf(note);
+    }
+
     public Note getNote(int index) {
         return notes.get(index);
     }
@@ -73,10 +78,11 @@ public class NoteService {
 
     @SuppressWarnings("unchecked")
     public void loadAllNotes() {
-        if (!Files.exists(saveFile)) {
+        Path source = Files.exists(saveFile) ? saveFile : legacySaveFile();
+        if (!Files.exists(source)) {
             return;
         }
-        try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(saveFile))) {
+        try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(source))) {
             Object raw = in.readObject();
             if (raw instanceof List<?> loaded) {
                 notes.clear();
@@ -87,7 +93,7 @@ public class NoteService {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, "Failed to load notes from " + saveFile, e);
+            LOGGER.log(Level.WARNING, "Failed to load notes from " + source, e);
         }
     }
 
@@ -96,6 +102,10 @@ public class NoteService {
     }
 
     private static Path defaultSaveFile() {
-        return Path.of(System.getProperty("user.home"), ".swing-notepad", SAVE_FILE_NAME);
+        return Path.of(System.getProperty("user.home"), AppBranding.STORAGE_DIR, SAVE_FILE_NAME);
+    }
+
+    private static Path legacySaveFile() {
+        return Path.of(System.getProperty("user.home"), AppBranding.LEGACY_STORAGE_DIR, SAVE_FILE_NAME);
     }
 }
