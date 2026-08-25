@@ -220,6 +220,7 @@ public final class MenuBarFactory {
                     }
                 }
                 noteListPanel.refresh();
+                noteService.saveAllNotes();
                 JOptionPane.showMessageDialog(parent, "Note imported as: " + file.getName());
             } catch (Exception ex) {
                 showError(parent, "Import failed.");
