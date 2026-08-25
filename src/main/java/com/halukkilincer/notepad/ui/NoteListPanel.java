@@ -42,6 +42,7 @@ public class NoteListPanel extends JPanel {
                             noteService.updateNote(index, updatedNote);
                             refresh();
                             noteJList.setSelectedIndex(index);
+                            noteService.saveAllNotes();
                         }
                     }
                 }
@@ -54,6 +55,7 @@ public class NoteListPanel extends JPanel {
         noteService.addNote(note);
         listModel.addElement(note);
         noteJList.setSelectedValue(note, true);
+        noteService.saveAllNotes();
     }
 
     private void onRemoveNote(ActionEvent e) {
@@ -61,6 +63,7 @@ public class NoteListPanel extends JPanel {
         if (selected != null) {
             noteService.removeNote(selected);
             listModel.removeElement(selected);
+            noteService.saveAllNotes();
         }
     }
 
