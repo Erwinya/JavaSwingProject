@@ -11,7 +11,7 @@ Repository: [Erwinya/noteshelf](https://github.com/Erwinya/noteshelf)
 - File open/save and export (TXT, RTF, HTML)
 - Undo / redo, find & replace
 - Light / dark / high-contrast themes
-- HK brand icon; notes auto-saved under your user profile
+- HK brand icon; notes auto-saved under your user profile (`~/.noteshelf` on Linux/macOS, `%USERPROFILE%\.noteshelf` on Windows)
 
 ## Requirements
 
